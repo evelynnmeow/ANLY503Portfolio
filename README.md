@@ -10,6 +10,10 @@ The link to the final project is:
 
 https://evelynnmeow.github.io/CosmeticIngredientsAnalysis/
 
+The GitHub Repo of the final project is:
+
+https://github.com/evelynnmeow/CosmeticIngredientsAnalysis
+
 The link to the online portfolio is:
 
 https://evelynnmeow.github.io/ANLY503Portfolio/
