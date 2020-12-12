@@ -1,0 +1,65 @@
+---
+title: "task1.Rmd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+# read in the data
+trans = read_csv("data/transactions.csv")
+accounts = read_csv("data/accounts_analytical.csv")
+head(trans)
+head(accounts)
+```
+
+
+
+
+
+```{r}
+df2 = accounts %>% mutate(loan = ifelse(is.na(loan_amount), F, T)) %>% mutate(avg_balance = credit_bank_transfer_other_avg_txn - debit_bank_transfer_household_payment_avg_txn)
+head(df2)
+```
+
+```{r}
+p4 = ggplot(data = df2, 
+       mapping = aes(x = account_id, 
+                     y = avg_balance, 
+                     color = factor(credit_cards))) +
+  geom_point(size = 0.1, alpha =0.4) + facet_grid(cols = vars(loan)) +
+  labs(title="Graph of Loans, Balance and Credit Cards", 
+         x="Accound ID", y = "Average Balance")
+p4
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,107 @@
+---
+title: "Task3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+```
+
+```{r}
+# read in the data
+accounts = read_csv("data/accounts_analytical.csv")
+head(accounts)
+```
+
+```{r}
+# focus on the only accounts with loans
+df = accounts %>% filter(!is.na(loan_amount))
+# mutate the days between the account is opened and the loan is created
+df1 = df %>% mutate(days = loan_date - acct_creation_date)
+head(df1)
+```
+
+```{r}
+p1 = ggplot(df1, aes(x=loan_default, y=days)) + 
+  geom_boxplot() +  labs(title="Boxplot of Days", 
+         x="Loan Default", y = "Number of Days") +stat_summary(fun.y=mean, geom="point", shape=25, size=5)
+
+p1
+
+```
+
+
+The mean and median days between the time when the account is opened and the loan is created is slightly different between these two groups. Generally speaking, the shorter time period between he time when the account is opened and the loan is created, the higher change of the loan being defaulted.   
+
+```{r}
+# get all accounts with default loans
+default = df1 %>% filter(loan_default == T)
+head(default)
+
+```
+```{r}
+# dirstribution of days 
+p2 = ggplot(df1, aes(x=days)) + geom_histogram(color="black", fill="lightblue") + labs(title="Histogram of Days", 
+         x="Days", y = "Count") + facet_grid(cols = vars(loan_default))
+p2
+
+```
+
+```{r}
+p3 = ggplot(df1, aes(x=loan_amount)) + geom_histogram(color="black", fill="lightblue") + labs(title="Histogram of Loan amount", 
+         x="Loan amount", y = "Count") + facet_grid(cols = vars(loan_default))
+p3
+
+```
+
+
+```{r}
+p5 = ggplot(df1, aes(x=loan_term)) + geom_histogram(stat="count",color="black", fill="lightblue") + labs(title="Histogram of Loan Payment", 
+         x="Loan payment", y = "Count") + facet_grid(cols = vars(loan_default))
+p5
+
+```
+```{r}
+# mutate avg balance to the dataframe
+df1 = df1 %>% mutate(avg_balance = credit_bank_transfer_other_avg_txn - debit_bank_transfer_household_payment_avg_txn)
+
+```
+
+```{r}
+p6 = ggplot(df1, aes(x=avg_balance)) + geom_histogram(color="black", fill="lightblue") + labs(title="Histogram of Average Balance", 
+         x="Average Balance", y = "Count") + facet_grid(cols = vars(loan_default))
+p6
+
+```
+
+```{r}
+p4 = ggplot(df1, aes(x=loan_payment)) + geom_histogram(color="black", fill="lightblue") + labs(title="Histogram of Loan Payment", 
+         x="Loan payment", y = "Count") + facet_grid(cols = vars(loan_default))
+p4
+```
+
+
+As we can see in the graph above, loans with payment more than 7500 have a higher change of default.   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

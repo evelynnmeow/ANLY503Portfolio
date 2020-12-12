@@ -1,0 +1,88 @@
+---
+title: "task5"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+# read in the data
+account = read_csv("data/accounts_analytical.csv")
+head(account)
+```
+
+
+```{r}
+df1 = account %>% mutate(credit_card = ifelse(is.na(credit_cards), "No credit card", "Has credit cards"))
+
+```
+
+```{r}
+p1 = ggplot(data = df1, 
+       mapping = aes(x = account_id, 
+                     y = debit_credit_card_other_txn_ct, 
+                     color = credit_card)) +
+  geom_point(size = 0.1, alpha =0.5) + labs(title="Credit card transaction count", 
+         x="Accound ID", y = "Credit card transaction count")
+
+p1
+```
+
+
+```{r}
+p2 = ggplot(data = df1, 
+       mapping = aes(x = account_id, 
+                     y = debit_credit_card_other_txn_tot, 
+                     color = credit_card)) +
+  geom_point(size = 0.1, alpha =0.5) + labs(title="Credit card transaction total", 
+         x="Accound ID", y = "Credit card transaction total")
+
+p2
+
+```
+
+
+```{r}
+p3 = ggplot(data = df1, 
+       mapping = aes(x = account_id, 
+                     y = debit_credit_card_other_avg_txn, 
+                     color = credit_card)) +
+  geom_point(size = 0.1, alpha =0.5) + labs(title="Credit card transaction average", 
+         x="Accound ID", y = "Credit card transaction average")
+
+p3
+
+```
+
+
+The data is not valid since there should be no credit card transaction for those account with no credit card. If the data is valid, these should be no blue points with positive y-values in the three graphs above. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
