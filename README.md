@@ -1,4 +1,4 @@
-# ANLY503Portfolio
+# ANLY503 Visualization Portfolio
 
 Online Portfolio of ANLY 503 at Georgetown University
 
