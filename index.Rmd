@@ -1,0 +1,448 @@
+---
+title: "ANLY 503 Portfolio"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: scroll
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+```
+
+Introduction
+=====================================  
+
+
+<pre></pre>
+<pre></pre>
+
+##### This website contains some of the homework and the final project of ANLY 503. For more information, please check the following GitHub repo for the full version of all homework assignments.
+##### https://github.com/evelynnmeow/ANLY503Portfolio
+
+</pre>
+</pre>
+Data Munging Part 1
+=====================================  
+Column {data-width=650}
+-----------------------------------------------------------------------
+<pre></pre>
+<pre></pre>
+<pre></pre>
+<pre></pre>
+### Before Munging
+
+```{r}
+ #read in the data
+loan = read.csv("data1/data/loans.csv")
+head(loan)
+```
+
+-----------------------------------------------------------------------
+
+### After Munging
+```{r}
+# collect information of loands
+df1 = loan %>% pivot_longer(cols = X24_A:X60_A, names_to = 'demo', values_to = 'status')
+
+# extract the loan type and duration
+f2 = df1 %>% 
+  extract(demo, c('duration', 'type'), regex = 'X([0-9][0-9])[_]([A-Z])')
+
+# Since one account can only have one load, drop any loan that status is not X
+# also drop the status col since it is irrelevant
+loan_final = f2 %>% filter(status== 'X') %>% select(-status)
+head(loan_final)
+
+
+
+
+```
+</pre>
+</pre>
+</pre>
+</pre>
+Data Munging Part 2
+=====================================  
+Column {data-width=650}
+-----------------------------------------------------------------------
+<pre></pre>
+<pre></pre>
+<pre></pre>
+<pre></pre>
+### Before Munging
+
+```{r}
+# read in the data
+df = read.csv('data1/data/districts.csv')
+head(df)
+```
+
+
+### After Munging
+```{r}
+# extract info of municipality info column
+df1 = df %>% 
+  extract(municipality_info, 
+          c('pop_lessn_500', 'pop_500_1999', 'pop_2000_9999', 'pop_greater_10000'), 
+          regex = '\\[([0-9]+)[,]+([0-9]+)[,]+([0-9]+)[,]+([0-9]+)\\]')
+
+
+# extract the unemployment rate from 95 and 96
+df2 = df1 %>% 
+  extract(unemployment_rate, c('unemployment_rate_95', 'unemployment_rate_96'),
+          regex = '\\[([0-9]+.[0-9]+)[,]+([0-9].[0-9]+)\\]')
+
+
+# extract commited crimes from 95 and 96
+df3 = df2 %>% 
+  extract(commited_crimes, c('commited_crimes_95', 'commited_crimes_96'), 
+          regex = '\\[([0-9]+)[,]+([0-9]+)\\]')
+
+head(df3)
+```
+
+</pre>
+</pre>
+</pre>
+</pre>
+ScatterPlots
+=====================================  
+<pre></pre>
+<pre></pre>
+<pre></pre>
+<pre></pre>
+Column {data-width=800}
+-----------------------------------------------------------------------
+
+```{r}
+# read in the data
+trans = read_csv("HW5/data/transactions.csv")
+accounts = read_csv("HW5/data/accounts_analytical.csv")
+df = accounts %>% filter(!is.na(loan_amount))
+p1 = ggplot(data=df, aes(x=account_id, y=loan_amount)) +
+  geom_point(size = 0.05) + labs(title="Scatterplot of loan amount", 
+         x="Account ID", y = "Loan Amount")
+
+p1
+```
+
+```{r}
+df1 = accounts %>% mutate(credit_card = ifelse(is.na(credit_cards), "No credit card", "Has credit cards"))
+p1 = ggplot(data = df1, 
+       mapping = aes(x = account_id, 
+                     y = debit_credit_card_other_txn_ct, 
+                     color = credit_card)) +
+  geom_point(size = 0.1, alpha =0.5) + labs(title="Credit card transaction count", 
+         x="Accound ID", y = "Credit card transaction count")
+
+p1
+```
+
+Column {data-width=800}
+-----------------------------------------------------------------------
+
+```{r}
+p2 = ggplot(data = df1, 
+       mapping = aes(x = account_id, 
+                     y = debit_credit_card_other_txn_tot, 
+                     color = credit_card)) +
+  geom_point(size = 0.1, alpha =0.5) + labs(title="Credit card transaction total", 
+         x="Accound ID", y = "Credit card transaction total")
+
+p2
+
+```
+
+```{r}
+p3 = ggplot(data = df1, 
+       mapping = aes(x = account_id, 
+                     y = debit_credit_card_other_avg_txn, 
+                     color = credit_card)) +
+  geom_point(size = 0.1, alpha =0.5) + labs(title="Credit card transaction average", 
+         x="Accound ID", y = "Credit card transaction average")
+
+p3
+
+```
+
+</pre>
+</pre>
+</pre>
+</pre>
+
+Histograms
+=====================================  
+<pre></pre>
+<pre></pre>
+<pre></pre>
+<pre></pre>
+Column {data-width=800}
+-----------------------------------------------------------------------
+```{r}
+df = accounts %>% filter(!is.na(loan_amount))
+p2 = ggplot(df, aes(x=loan_amount)) + geom_histogram(color="black", fill="lightblue") + labs(title="Histogram of Loan Amount", 
+         x="Loan Amount", y = "Count")
+p2
+```
+```{r}
+p6 = ggplot(df, aes(x=loan_payment)) + geom_histogram(color="black", fill="lightblue") + labs(title="Histogram of Loan Payment", 
+         x="Loan Payment", y = "Count")
+p6
+```
+
+Column {data-width=800}
+-----------------------------------------------------------------------
+
+```{r}
+p7 = ggplot(df, aes(x=loan_date)) + geom_histogram(color="black", fill="lightblue") + labs(title="Histogram of Loan Date", 
+         x="Loan Date", y = "Count")
+p7
+
+```
+
+```{r}
+df1 = df %>% mutate(days = loan_date - acct_creation_date)
+default = df1 %>% filter(loan_default == T)
+# dirstribution of days 
+p2 = ggplot(df1, aes(x=days)) + geom_histogram(color="black", fill="lightblue") + labs(title="Histogram of Days", 
+         x="Days", y = "Count") + facet_grid(cols = vars(loan_default))
+p2
+
+```
+
+
+```{r, echo =FALSE}
+# read in the dataset
+sephora = read.csv("final/data/products.csv", header = T) 
+chemical = read.csv("final/data/cscpopendata.csv", header = T)
+ingredients = read.csv("final/data/ingredients.csv", header = T)
+
+```
+
+```{r, echo = FALSE}
+# select useful features 
+short = ingredients %>% select(code, product_name, main_category_en, quantity, 
+                               brands, manufacturing_places, countries_en, ingredients_text, 
+                               additives_n, additives_en, 
+                               states_en)
+# filter out NAs
+ingredient = short %>% filter(product_name != "") %>% filter(main_category_en != "") %>% filter(ingredients_text != "") 
+
+```
+
+```{r, echo = FALSE}
+# create my own color theme
+library(ggplot2)
+
+theme_set(theme_minimal())
+
+custom_colors <- c(
+  `pink`      = "#ffd4df",
+  `red`        = "#ff4101",
+  `purple`     = "#8A2BE2",
+  `green`      = "#dfffd4",
+  `blue`       = "#d4f5ff",
+  `yellow`     = "#fff4d4",
+  `light grey` = "#cccccc",
+  `dark grey`  = "#8c8c8c")
+
+custom_cols <- function(...) {
+  cols <- c(...)
+
+  if (is.null(cols))
+    return (custom_colors)
+
+  custom_colors[cols]
+}
+
+custom_palettes <- list(
+  `main`  = custom_cols("pink", "blue", "green"),
+
+  `cool`  = custom_cols("blue", "green"),
+
+  `warm`   = custom_cols("pink", "red"),
+
+  `mixed` = custom_cols("blue", "green", "purple", "light grey", "red"),
+
+  `grey`  = custom_cols("light grey", "dark grey")
+)
+
+custom_pal <- function(palette = "main", reverse = FALSE, ...) {
+  pal <- custom_palettes[[palette]]
+
+  if (reverse) pal <- rev(pal)
+
+  colorRampPalette(pal, ...)
+}
+
+scale_color_custom <- function(palette = "main", discrete = TRUE, reverse = FALSE, ...) {
+  pal <- custom_pal(palette = palette, reverse = reverse)
+
+  if (discrete) {
+    discrete_scale("colour", paste0("custom_", palette), palette = pal, ...)
+  } else {
+    scale_color_gradientn(colours = pal(256), ...)
+  }
+}
+
+scale_fill_custom <- function(palette = "main", discrete = TRUE, reverse = FALSE, ...) {
+  pal <- custom_pal(palette = palette, reverse = reverse)
+
+  if (discrete) {
+    discrete_scale("fill", paste0("custom_", palette), palette = pal, ...)
+  } else {
+    scale_fill_gradientn(colours = pal(256), ...)
+  }
+}
+
+```
+
+```{r, echo = FALSE}
+# get the number of cases reported in primary category
+primary_cat = chemical %>% group_by(PrimaryCategory) %>% count
+# get the number of cases reported in makeup
+makeup = chemical %>% filter(PrimaryCategoryId == 44)
+sub_cat = makeup %>% group_by(SubCategory) %>% count
+# get the number of cases reported in lip color
+lips = makeup %>% filter(SubCategoryId == 53)
+lips_cat = lips %>% group_by(ChemicalName) %>% count %>% arrange(desc(n)) %>% head(4) 
+```
+
+```{r, echo = FALSE}
+# sentiment analysis
+# import library
+library(stringr)
+library(tidytext)
+#head(sephora)
+# lip products
+lip = sephora %>% filter(product_type == "\nLipstick\n" |  product_type == "\nLipgloss\n") %>% select(ID, description)
+
+# sentiments dataset
+sents = get_sentiments("afinn")
+
+# unnest and join
+t1 = lip %>% mutate(des = as.character(description)) %>% unnest_tokens(word, des)
+des_sent = left_join(t1, sents, by = "word")
+
+df1 = des_sent %>% filter(!is.na(value)) %>% group_by(value) %>% count
+```
+
+
+```{r, echo = FALSE}
+# titanium dioxide in all categories
+tio2 = chemical %>% filter(ChemicalName == "Titanium dioxide")
+# head(tio2)
+ti_cat = tio2 %>% group_by(PrimaryCategory) %>% count
+ti_date = tio2 %>% group_by(InitialDateReported) %>% count
+
+# manipulate the data
+# change the data from char to datetime object
+library(lubridate) 
+ti_date1 = ti_date %>% mutate(date = as.Date(InitialDateReported, "%m/%d/%Y"))
+
+```
+
+```{r, echo = FALSE}
+# get all retinol products
+retinol = chemical %>% filter(ChemicalName == "Retinol")
+# get the date
+re_date = retinol %>% group_by(InitialDateReported) %>% count
+re_date1 = re_date %>% mutate(date = as.Date(InitialDateReported, "%m/%d/%Y"))
+
+
+```
+
+```{r, echo = FALSE}
+# read in the world map
+world_map <- map_data("world")
+# read in the active ingredient data
+additive = read.csv("final/data/additive.csv", header = T)
+
+```
+</pre>
+</pre>
+</pre>
+</pre>
+Network Graph and Geographical Graph
+=====================================  
+<pre></pre>
+<pre></pre>
+<pre></pre>
+<pre></pre>
+### Network Graph
+```{r, echo = FALSE}
+library(GGally)
+library(network)
+```
+````{r}
+# set seed
+set.seed(919)
+# get a random sample of 50
+chem_work =chemical %>% select(ChemicalId, PrimaryCategoryId) %>% drop_na() %>% sample_n(50)
+# change the type to char
+chem_work$ChemicalId <- as.character(chem_work$ChemicalId)
+chem_work$fPrimaryCategoryId <- as.character(chem_work$PrimaryCategoryId)
+```
+
+```{r}
+# build the network
+nw <- network(chem_work, directed = TRUE, matrix.type = "edgelist")
+
+```
+
+```{r}
+# draw the plot
+ggnet2(net = nw, 
+       color = "pink",
+       label = TRUE, 
+       label.size = 3,
+       arrow.size = 0.3, 
+       arrow.gap = .03)
+
+```
+
+### Geographical Graph
+```{r}
+# lop the world map
+world <- map_data("world")
+# plot the world map
+p8 = ggplot() +
+  geom_map(
+    data = world, map = world,
+    aes(long, lat, map_id = region),
+    color = "black", fill = "lightgray", size = 0.1
+  )  + 
+  geom_point(
+    data = additive,
+    aes(longitude, latitude, color = "pink", size = avg_active_ingredient),
+    alpha = 0.7
+  ) + 
+  labs(title="Average Active Ingredients of Products Sold in Each Country", x = "Longitude", y = "Latitude")
+p8
+
+```
+
+</pre>
+</pre>
+</pre>
+</pre>
+
+Final Project Website
+=====================================  
+
+<pre></pre>
+<pre></pre>
+
+
+
+
+
+For the final project, please nevigate to:
+
+https://evelynnmeow.github.io/CosmeticIngredientsAnalysis/
+
+</pre>
+</pre>
+
